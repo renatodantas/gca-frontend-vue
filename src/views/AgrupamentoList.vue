@@ -2,33 +2,21 @@
   <v-container>
     <v-row>
       <v-col>
-
-    <!--
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Ativo</th>
-        <th></th>
-      </tr>
-      <tr v-for="item in lista" :key="item.id">
-        <td>
-          <router-link :to="`/agrupamentos/${item.id}`">{{ item.id }}</router-link>
-        </td>
-        <td>{{ item.nome }}</td>
-        <td class="text-center">
-          <ActiveIcon :value="item.ativo"></ActiveIcon>
-        </td>
-        <td class="text-center">
-          <DeleteIcon @delete="excluir(item)"></DeleteIcon>
-        </td>
-      </tr>
-    </table>
-    -->
-    <v-data-table
-      :headers="headers"
-      :items="lista">
-    </v-data-table>
+        <v-data-table
+          :headers="table.headers"
+          :items="table.result.items"
+          item-key="id"
+          :server-items-length="table.result.count"
+          class="elevation-4">
+          
+          <template v-slot:item.ativo="{ item: { ativo } }">
+            <ActiveIcon :value="ativo" />
+          </template>
+          
+          <template v-slot:item.actions="{ item }">
+            <DeleteIcon @delete="excluir(item)" />
+          </template>
+        </v-data-table>
       </v-col>
     </v-row>
   </v-container>
@@ -37,6 +25,7 @@
 <script>
 import ActiveIcon from '../components/ActiveIcon'
 import DeleteIcon from '../components/DeleteIcon'
+
 import * as service from '../service/agrupamento.service'
 
 export default {
@@ -45,12 +34,25 @@ export default {
   components: { ActiveIcon, DeleteIcon },
 
   data: () => ({
-    headers: [
-      { text: 'ID', value: 'id', align: 'right' },
-      { text: 'Nome', value: 'name' },
-      { text: 'Ativo', value: 'ativo', align: 'right' },
-    ],
-    lista: []
+    table: {
+      headers: [
+        { text: 'ID', value: 'id', align: 'right' },
+        { text: 'Nome', value: 'nome' },
+        { text: 'Ativo', value: 'ativo', align: 'center' },
+        { text: 'Actions', value: 'actions', align: 'center', sortable: false }
+      ],
+      result: {
+        count: 0,
+        page: 0,
+        itemsPerPage: 0,
+        totalPages: 0,
+      }
+    },
+    alert: {
+      exibir: false,
+      tipo: '',
+      mensagem: ''
+    }
   }),
   
   created() {
@@ -59,9 +61,10 @@ export default {
   
   methods: {
     load() {
-      service.loadAll().then(res => {
-        this.lista = res.results
-      })
+      service.loadAll().then(res => this.table.result = res)
+    },
+    excluir(item) {
+      this.$store.dispatch('mensagemErro', 'Agrupamento excluído com sucesso')
     }
   }
 }

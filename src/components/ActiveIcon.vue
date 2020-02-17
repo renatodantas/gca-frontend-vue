@@ -1,5 +1,5 @@
 <template>
-  <i class="fa fa-fw" :class="classes"></i>
+  <i class="fa fa-fw fa-lg" :class="classes"></i>
 </template>
 
 <script>
@@ -14,8 +14,8 @@ export default {
   computed: {
     classes() {
       return {
-        'fa-check-circle': this.value,
-        'fa-times': !this.value
+        'fa-check-circle green--text': this.value,
+        'fa-times red--text': !this.value
       }
     }
   }
